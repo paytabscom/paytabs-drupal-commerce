@@ -1,0 +1,17 @@
+{
+    "name": "paytabscom/drupal_commerce",
+    "type": "drupal-module",
+    "description": "PayTabs payment integration for Drupal Commerce 2.x.",
+    "authors": [
+        {
+            "name": "Walaa Elsaeed",
+            "email": "w.elsaeed@paytabs.com"
+        }
+    ],
+    "homepage": "https://www.drupal.org/project/commerce_paytabs",
+    "license": "GPL-2.0+",
+    "require": {
+        "drupal/commerce": "^2.0"
+    },
+    "minimum-stability": "dev"
+}
