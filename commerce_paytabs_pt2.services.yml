@@ -1,0 +1,7 @@
+services:
+  commerce_paytabs_pt2.cookie_samesite.session_configuration:
+    class: Drupal\commerce_paytabs_pt2\Session\CookieSameSiteSessionConfiguration
+    decorates: session_configuration
+    public: false
+    arguments:
+      - '%session.storage.options%'
