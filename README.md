@@ -50,4 +50,14 @@ SCREENSHOTS
 -------------
 
 
-![Configuration Page](/../main/src/images/checkout%20page.jpg?raw=true "Configuration Page")
+![Configuration Page](/../main/src/images/configuration page.jpg?raw=true "Configuration Page")
+
+![Checkout Page](/../main/src/images/checkout page.jpg?raw=true "Checkout Page")
+
+![Payment Page](/../main/src/images/payment page.jpg?raw=true "Payment Page")
+
+![return Page](/../main/src/images/return page.jpg?raw=true "return Page")
+
+![order status Page](/../main/src/images/order status dashboard.jpg?raw=true "order status Page")
+
+![payment result Page](/../main/src/images/payment result page dashboard.jpg?raw=true "payment result Page")
