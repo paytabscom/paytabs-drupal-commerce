@@ -38,6 +38,7 @@ use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsRefundsInterf
  *   credit_card_types = {
  *     "visa", "mastercard",
  *   },
+ *
  * )
  */
 class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements SupportsRefundsInterface
