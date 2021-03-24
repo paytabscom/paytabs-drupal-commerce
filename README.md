@@ -45,3 +45,7 @@ CONFIGURATION
   - Server key.
   - Merchant region.
   - Order Complete status
+
+SCREENSHOTS
+-------------
+![Configuration Page](/drupal_commerce/src/images/configuration page.jpg?raw=true "Configuration Page")

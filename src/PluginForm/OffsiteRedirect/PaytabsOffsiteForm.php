@@ -60,7 +60,7 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
 
 
     /** @var \Drupal\telephone\Plugin\Field\FieldType\TelephoneItem $phone */
-    $phone = $profile->get('field_phone')->value ? $profile->get('field_phone')->value : '00000000000';
+    $phone = isset($profile->get('field_phone')->value) ? $profile->get('field_phone')->value : '00000000000';
 
 
     /** @var \Drupal\commerce_order\Entity\OrderInterface $order */
