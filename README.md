@@ -48,4 +48,6 @@ CONFIGURATION
 
 SCREENSHOTS
 -------------
-![Configuration Page](/drupal_commerce/src/images/configuration page.jpg?raw=true "Configuration Page")
+
+
+![Configuration Page](/../main/src/images/checkout%20page.jpg?raw=true "Configuration Page")
