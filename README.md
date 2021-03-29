@@ -45,6 +45,12 @@ CONFIGURATION
   - Server key.
   - Merchant region.
   - Order Complete status
+  
+* Make sure to install telephone module and enable it
+  - go to config / people / profile types/ manage fields / add new field
+  - add phone number field with name phone.
+  
+* Make sure that your website currency is as same as your currency in payTabs profile
 
 SCREENSHOTS
 -------------
