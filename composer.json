@@ -8,7 +8,7 @@
             "email": "w.elsaeed@paytabs.com"
         }
     ],
-    "homepage": "https://www.drupal.org/project/commerce_paytabs",
+    "homepage": "https://www.drupal.org/project/paytabs_drupal_cmmerce",
     "license": "GPL-2.0+",
     "require": {
         "drupal/commerce": "^2.0"
