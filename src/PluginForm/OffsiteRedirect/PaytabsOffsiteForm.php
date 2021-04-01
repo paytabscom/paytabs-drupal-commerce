@@ -37,8 +37,10 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
         $config = $payment_gateway_plugin->getConfiguration();
 
         /**PayTabs SDK**/
-        $paytabs_core = new Paytabs_core2();
-        $paytabs_api = new PaytabsApi($config['region'], $config['profile_id'], $config['server_key']);
+        $paytabs_init = new Paytabs_core2();
+        $paytabs_core = new PaytabsHolder2();
+        $paytabs_api = PaytabsApi::getInstance($config['region'], $config['profile_id'], $config['server_key']);
+
 
 
         /** @var \Drupal\commerce_price\Price $amount */
@@ -60,11 +62,14 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
 
 
         /** @var \Drupal\telephone\Plugin\Field\FieldType\TelephoneItem $phone */
-        if ($profile->hasField('field_phone')) {
+        if($profile->hasField('field_phone'))
+        {
             $phone = $profile->get('field_phone')->value;
-        } elseif ($profile->hasField('telephone'))
+        }
+        elseif ($profile->hasField('telephone'))
             $phone = $profile->get('telephone')->value;
-        else {
+        else
+        {
             $phone = 00000000000;
         }
 
