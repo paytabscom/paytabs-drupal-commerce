@@ -236,7 +236,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
     $is_valid = $paytabs_api->is_valid_redirect($all_response);
 
     if (!$is_valid) {
-      $this->messenger()->addStatus($this->t('not valid result from PayTabs'));
+      $this->messenger()->addError($this->t('not valid result from PayTabs'));
     } else {
       $trans_ref = $request->request->get('tranRef');
       $respStatus = $request->request->get('respStatus');
@@ -244,13 +244,17 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
       if ($respStatus === 'A') {
         $message = 'Your payment was successful to payTabs with Transaction reference ';
         $payment_status = 'completed';
+          $this->messenger()->addStatus($this->t($message . ' : %trans_ref', [
+              '%trans_ref' => $trans_ref,
+          ]));
       } elseif ($respStatus === 'C') {
         $message = 'Your payment was Cancelled with Transaction reference ';
         $payment_status = 'cancelled';
+          $this->messenger()->addError($this->t($message . ' : %trans_ref', [
+              '%trans_ref' => $trans_ref,
+          ]));
       }
-      $this->messenger()->addStatus($this->t($message . ' : %trans_ref', [
-        '%trans_ref' => $trans_ref,
-      ]));
+
 
 
       //Check if order don't have payments to insert it
@@ -303,7 +307,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
     $is_valid = $paytabs_api->is_valid_redirect($all_response);
 
     if (!$is_valid) {
-      $this->messenger()->addStatus($this->t('not valid result from PayTabs'));
+      $this->messenger()->addError($this->t('not valid result from PayTabs'));
     } else {
       $trans_ref = $request->request->get('tranRef');
       $respStatus = $request->request->get('respStatus');
@@ -311,13 +315,17 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
       if ($respStatus === 'A') {
         $message = 'Your payment was successful to payTabs with Transaction reference ';
         $payment_status = 'completed';
+          $this->messenger()->addStatus($this->t($message . ' : %trans_ref', [
+              '%trans_ref' => $trans_ref,
+          ]));
       } elseif ($respStatus === 'C') {
         $message = 'Your payment was Cancelled with Transaction reference ';
         $payment_status = 'cancelled';
+          $this->messenger()->addError($this->t($message . ' : %trans_ref', [
+              '%trans_ref' => $trans_ref,
+          ]));
       }
-      $this->messenger()->addStatus($this->t($message . ' : %trans_ref', [
-        '%trans_ref' => $trans_ref,
-      ]));
+
 
 
       //Check if order don't have payments to insert it
@@ -355,7 +363,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
    */
   public function onCancel(OrderInterface $order, Request $request)
   {
-    $this->messenger()->addMessage($this->t('You have canceled checkout at @gateway but may resume the checkout process here when you are ready.', [
+    $this->messenger()->addError($this->t('You have canceled checkout at @gateway but may resume the checkout process here when you are ready.', [
       '@gateway' => $this->getDisplayLabel(),
     ]));
   }
@@ -398,7 +406,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         $payment->setRefundedAmount($new_refunded_amount);
         $payment->save();
       } else {
-        $this->messenger()->addStatus($this->t('not valid result from PayTabs'));
+        $this->messenger()->addError($this->t('not valid result from PayTabs'));
       }
 
     } catch (\Exception $e) {
