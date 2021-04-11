@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Symfony\Component\Yaml\Yaml;
 
 class PaytabsOffsiteForm extends BasePaymentOffsiteForm
 {
@@ -37,8 +38,8 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
         $config = $payment_gateway_plugin->getConfiguration();
 
         /**PayTabs SDK**/
-        $paytabs_init = new Paytabs_core2();
-        $paytabs_core = new PaytabsHolder2();
+        $paytabs_init = new Paytabs_core();
+        $paytabs_core = new PaytabsRequestHolder();
         $paytabs_api = PaytabsApi::getInstance($config['region'], $config['profile_id'], $config['server_key']);
 
 
@@ -92,6 +93,12 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
         $payment_entity = $payment_gateway_plugin->getPaytabsEntity();
         $call_back = $site_url . '/payment/notify/' . $payment_entity;
 
+        $platform_info = Yaml::parseFile(DRUPAL_ROOT . '/modules/contrib/commerce/commerce.info.yml');
+        $platform_version = $platform_info['version'];
+
+        $plugin_info = Yaml::parseFile(DRUPAL_ROOT . '/modules/contrib/drupal_commerce/commerce_paytabs_pt2.info.yml');
+        $plugin_version = $plugin_info['version'];
+
         $paytabs_core
             ->set01PaymentCode('all') // 'card', 'stcpay', 'amex' ...
             ->set02Transaction('sale', 'ecom')
@@ -101,7 +108,8 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
             ->set06HideShipping(false)
             ->set07URLs($form['#return_url'], $call_back)
             ->set08Lang($language)
-            ->set09Framed(false);
+            ->set09Framed(false)
+            ->set99PluginInfo('DrupalCommerce',$platform_version,$plugin_version);
 
 
         $pp_params = $paytabs_core->pt_build();

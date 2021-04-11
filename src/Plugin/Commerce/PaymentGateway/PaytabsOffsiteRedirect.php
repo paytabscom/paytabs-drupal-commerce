@@ -8,8 +8,10 @@ use Drupal\commerce_payment\Exception\PaymentGatewayException;
 use Drupal\commerce_payment\PaymentMethodTypeManager;
 use Drupal\commerce_payment\PaymentTypeManager;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\OffsitePaymentGatewayBase;
-use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\Paytabs_core2;
+use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\Paytabs_core;
 use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\PaytabsApi;
+use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\PaytabsEnum;
+use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\PaytabsFollowupHolder;
 use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\PaytabsTransactionOperationsHolder;
 use Drupal\commerce_price\Price;
 use Drupal\Component\Datetime\TimeInterface;
@@ -144,7 +146,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         $form = parent::buildConfigurationForm($form, $form_state);
 
         $form['profile_id'] = [
-            '#type' => 'textfield',
+            '#type' => 'number',
             '#title' => $this->t('Merchant Profile id'),
             '#required' => TRUE,
             '#description' => $this->t('Your merchant profile id , you can find the profile id on your ayTabs Merchant’s Dashboard- profile.'),
@@ -229,7 +231,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         $all_response = $request->request->all();
 
         /**PayTabs SDK**/
-        $paytabs_core = new Paytabs_core2();
+        $paytabs_core = new Paytabs_core();
         $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
 
         $is_valid = $paytabs_api->is_valid_redirect($all_response);
@@ -250,6 +252,12 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 $message = 'Your payment was Cancelled with Transaction reference ';
                 $payment_status = 'cancelled';
                 $this->messenger()->addError($this->t($message . ' : %trans_ref', [
+                    '%trans_ref' => $trans_ref,
+                ]));
+            } else {
+                $message = 'Your payment was '.$all_response['respMessage'].'with Transaction reference ';
+                $payment_status = $all_response['respMessage'];
+                $this->messenger()->addWarning($this->t($message . ' : %trans_ref', [
                     '%trans_ref' => $trans_ref,
                 ]));
             }
@@ -300,7 +308,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         $all_response = $request->request->all();
 
         /**PayTabs SDK**/
-        $paytabs_core = new Paytabs_core2();
+        $paytabs_core = new Paytabs_core();
         $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
 
         $is_valid = $paytabs_api->is_valid_redirect($all_response);
@@ -321,6 +329,12 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 $message = 'Your payment was Cancelled with Transaction reference ';
                 $payment_status = 'cancelled';
                 $this->messenger()->addError($this->t($message . ' : %trans_ref', [
+                    '%trans_ref' => $trans_ref,
+                ]));
+            } else {
+                $message = 'Your payment was '.$all_response['respMessage'].'with Transaction reference ';
+                $payment_status = $all_response['respMessage'];
+                $this->messenger()->addWarning($this->t($message . ' : %trans_ref', [
                     '%trans_ref' => $trans_ref,
                 ]));
             }
@@ -381,19 +395,25 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         $cart_id = $payment->getOrder()->id();
 
         /**PayTabs SDK**/
-        $paytabs_core = new Paytabs_core2();
+        $paytabs_core = new Paytabs_core();
         $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
-        $refund = new PaytabsTransactionOperationsHolder();
+        $refund = new PaytabsFollowupHolder();
         $this->assertRefundAmount($payment, $amount);
 
         // Perform the refund request here, throw an exception if it fails.
         try {
-            $refund->set01OperationInfo($decimal_amount, $currency_code)
-                ->set02Transaction($cart_id, $remote_id, 'refunded from drupal');
-            $refund_params = $refund->pt_build('R');
-            $result = $paytabs_api->refund($refund_params);
+            $refund->set02Transaction(PaytabsEnum::TRAN_TYPE_REFUND, PaytabsEnum::TRAN_CLASS_ECOM)
+                ->set03Cart($cart_id, $currency_code, $decimal_amount, 'refunded from drupal')
+                ->set30TransactionInfo($remote_id);
 
-            if ($result->success) {
+            $refund_params = $refund->pt_build();
+            $result = $paytabs_api->request_followup($refund_params);
+
+            $success = $result->success;
+            $message = $result->message;
+            $pending_success = $result->pending_success;
+
+            if ($success) {
                 // Determine whether payment has been fully or partially refunded.
                 $old_refunded_amount = $payment->getRefundedAmount();
                 $new_refunded_amount = $old_refunded_amount->add($amount);
@@ -404,10 +424,9 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 }
                 $payment->setRefundedAmount($new_refunded_amount);
                 $payment->save();
-            } else {
+            } else if ($pending_success) {
                 $this->messenger()->addError($this->t('not valid result from PayTabs'));
             }
-
         } catch (\Exception $e) {
             $this->logger->log('error', 'failed to proceed to refund transaction:' . $remote_id);
             throw new PaymentGatewayException($e);
