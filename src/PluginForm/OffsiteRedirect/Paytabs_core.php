@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect;
+namespace Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect;
 
 //init for drupal commerce plugin
 class Paytabs_core2{
