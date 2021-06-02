@@ -31,10 +31,10 @@ INSTALLATION
    - Enable the module
 
 * Install Via Composer:
-  - composer require paytabscom/drupal_commerce
+  - composer require paytabscom/paytabs-drupal-commerce
 
 * Install Via Github Repo Link:
-  - https://github.com/paytabscom/drupal_commerce
+  - https://github.com/paytabscom/paytabs-drupal-commerce
 
 CONFIGURATION
 -------------
