@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\commerce_paytabs_pt2\Plugin\Commerce\PaymentGateway;
+namespace Drupal\paytabs_drupal_commerce\Plugin\Commerce\PaymentGateway;
 
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_payment\Entity\PaymentInterface;
@@ -8,11 +8,12 @@ use Drupal\commerce_payment\Exception\PaymentGatewayException;
 use Drupal\commerce_payment\PaymentMethodTypeManager;
 use Drupal\commerce_payment\PaymentTypeManager;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\OffsitePaymentGatewayBase;
-use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\Paytabs_core;
-use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\PaytabsApi;
-use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\PaytabsEnum;
-use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\PaytabsFollowupHolder;
-use Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\PaytabsTransactionOperationsHolder;
+use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsAuthorizationsInterface;
+use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\Paytabs_core;
+use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsApi;
+use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsEnum;
+use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsFollowupHolder;
+use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsTransactionOperationsHolder;
 use Drupal\commerce_price\Price;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -34,7 +35,7 @@ use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsRefundsInterf
  *   label = "Paytabs PT2",
  *   display_label = "Paytabs PT2",
  *   forms = {
- *     "offsite-payment" = "Drupal\commerce_paytabs_pt2\PluginForm\OffsiteRedirect\PaytabsOffsiteForm",
+ *     "offsite-payment" = "Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsOffsiteForm",
  *   },
  *   payment_method_types = {"credit_card"},
  *   credit_card_types = {
@@ -42,7 +43,7 @@ use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsRefundsInterf
  *   },
  * )
  */
-class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements SupportsRefundsInterface
+class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements SupportsRefundsInterface,SupportsAuthorizationsInterface
 {
     /**
      * The logger.
@@ -134,6 +135,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 'profile_id' => '',
                 'server_key' => '',
                 'region' => '',
+                'pay_page_mode' => '',
                 'complete_order_status' => '',
             ] + parent::defaultConfiguration();
     }
@@ -174,6 +176,17 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             ],
             '#default_value' => $this->configuration['region'],
         ];
+        $form['pay_page_mode'] =[
+            '#type' => 'select',
+            '#required' => TRUE,
+            '#title' => $this->t('Pay Page Mode'),
+            '#description' => $this->t('The mode you need to process payment with '),
+            '#options' => [
+                'sale' => $this->t('Sale'),
+                'auth' => $this->t('Auth'),
+            ],
+            '#default_value' => $this->configuration['pay_page_mode'],
+        ];
 
         $form['complete_order_status'] = [
             '#type' => 'select',
@@ -203,6 +216,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $this->configuration['profile_id'] = $values['profile_id'];
             $this->configuration['server_key'] = $values['server_key'];
             $this->configuration['region'] = $values['region'];
+            $this->configuration['pay_page_mode'] = $values['pay_page_mode'];
             $this->configuration['complete_order_status'] = $values['complete_order_status'];
         }
     }
@@ -218,6 +232,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $this->configuration['profile_id'] = $values['profile_id'];
             $this->configuration['server_key'] = $values['server_key'];
             $this->configuration['region'] = $values['region'];
+            $this->configuration['pay_page_mode'] = $values['pay_page_mode'];
             $this->configuration['complete_order_status'] = $values['complete_order_status'];
         }
     }
@@ -241,10 +256,20 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         } else {
             $trans_ref = $request->request->get('tranRef');
             $respStatus = $request->request->get('respStatus');
+            $transaction_type = $paytabs_api->verify_payment($trans_ref);
+            $transaction_type = $transaction_type->tran_type;
             $this->logger->info('return Payment information. Transaction reference: ' . $trans_ref);
             if ($respStatus === 'A') {
                 $message = 'Your payment was successful to payTabs with Transaction reference ';
-                $payment_status = 'completed';
+                if ($transaction_type === 'Sale')
+                {
+                    $payment_status = 'completed';
+                }
+                elseif ($transaction_type === 'Auth')
+                {
+                    $payment_status = 'authorization';
+                }
+
                 $this->messenger()->addStatus($this->t($message . ' : %trans_ref', [
                     '%trans_ref' => $trans_ref,
                 ]));
@@ -318,10 +343,21 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         } else {
             $trans_ref = $request->request->get('tranRef');
             $respStatus = $request->request->get('respStatus');
+            $transaction_type = $paytabs_api->verify_payment($trans_ref);
+            $transaction_type = $transaction_type->tran_type;
+
             $this->logger->info('return Payment information. Transaction reference: ' . $trans_ref);
             if ($respStatus === 'A') {
                 $message = 'Your payment was successful to payTabs with Transaction reference ';
-                $payment_status = 'completed';
+                if ($transaction_type === 'Sale')
+                {
+                    $payment_status = 'completed';
+                }
+                elseif ($transaction_type === 'Auth')
+                {
+                    $payment_status = 'authorization';
+                }
+
                 $this->messenger()->addStatus($this->t($message . ' : %trans_ref', [
                     '%trans_ref' => $trans_ref,
                 ]));
@@ -434,6 +470,122 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
     }
 
+    public function capturePayment(PaymentInterface $payment, Price $amount = NULL)
+    {
+        $this->assertPaymentState($payment, ['authorization']);
+        // If not specified, capture the entire amount.
+        $amount = $amount ?: $payment->getAmount();
+        $decimal_amount = $amount->getNumber();
+        $currency_code = $payment->getAmount()->getCurrencyCode();
+        $remote_id = $payment->getRemoteId();
+        $cart_id = $payment->getOrder()->id();
+
+        /**PayTabs SDK**/
+        $paytabs_core = new Paytabs_core();
+        $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
+        $capture = new PaytabsFollowupHolder();
+
+        //to prevent from capture more than the order value
+        $this->assertAmount($payment, $amount,'Capture');
+
+        // Perform the refund request here, throw an exception if it fails.
+        try {
+            $capture->set02Transaction(PaytabsEnum::TRAN_TYPE_CAPTURE, PaytabsEnum::TRAN_CLASS_ECOM)
+                ->set03Cart($cart_id, $currency_code, $decimal_amount, 'Capture from drupal')
+                ->set30TransactionInfo($remote_id);
+
+            $capture_params = $capture->pt_build();
+            $result = $paytabs_api->request_followup($capture_params);
+
+            $success = $result->success;
+            $message = $result->message;
+            $pending_success = $result->pending_success;
+
+            if ($success) {
+                if($amount < $payment->getAmount()) //partial capture
+                {
+                    // update the authorized record with the remaining value
+                    $new_amount = $payment->getBalance()->subtract($amount);
+                    $payment->setAmount($new_amount);
+                    $payment->save();
+
+                    // create new payment record for capture transacion
+                    $payment_storage = $this->entityTypeManager->getStorage('commerce_payment');
+                    $payment = $payment_storage->create([
+                        'state' => 'completed',
+                        'amount' => $amount,
+                        'payment_gateway' => $this->entityId,
+                        'order_id' => $result->cart_id,
+                        'remote_id' => $result->tran_ref,
+                        'remote_state' => $result->payment_result->response_status,
+                        'authorized' => $this->time->getRequestTime(),
+                    ]);
+                    $this->logger->info('Saving Payment information. Transaction reference: ' . $result->tran_ref);
+                    $payment->save();
+                    $this->logger->info('Payment information saved successfully. Transaction reference: ' . $result->tran_ref);
+
+                }
+                else //full capture
+                {
+                    $payment->setState('completed');
+                    $payment->setRemoteId($result->tran_ref);
+                    $payment->setAmount($amount);
+                    $payment->save();
+                }
+
+            } else if ($pending_success) {
+                $this->messenger()->addError($this->t('not valid result from PayTabs'));
+            }
+        } catch (\Exception $e) {
+            $this->logger->log('error', 'failed to proceed to capture transaction:' . $remote_id);
+            throw new PaymentGatewayException($e);
+        }
+    }
+
+
+    public function voidPayment(PaymentInterface $payment)
+    {
+        $this->assertPaymentState($payment, ['authorization']);
+        // If not specified, capture the entire amount.
+        $amount = $payment->getAmount();
+        $decimal_amount = $amount->getNumber();
+        $currency_code = $payment->getAmount()->getCurrencyCode();
+        $remote_id = $payment->getRemoteId();
+        $cart_id = $payment->getOrder()->id();
+
+        /**PayTabs SDK**/
+        $paytabs_core = new Paytabs_core();
+        $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
+        $void = new PaytabsFollowupHolder();
+
+
+        // Perform the refund request here, throw an exception if it fails.
+        try {
+            $void->set02Transaction(PaytabsEnum::TRAN_TYPE_VOID, PaytabsEnum::TRAN_CLASS_ECOM)
+                ->set03Cart($cart_id, $currency_code, $decimal_amount, 'void from drupal')
+                ->set30TransactionInfo($remote_id);
+
+            $capture_params = $void->pt_build();
+            $result = $paytabs_api->request_followup($capture_params);
+
+            $success = $result->success;
+            $message = $result->message;
+            $pending_success = $result->pending_success;
+
+            if ($success) {
+                $payment->setState('authorization_voided');
+                $payment->setRemoteId($result->tran_ref);
+                $payment->save();
+
+            } else if ($pending_success) {
+                $this->messenger()->addError($this->t('not valid result from PayTabs'));
+            }
+        } catch (\Exception $e) {
+            $this->logger->log('error', 'failed to proceed to capture transaction:' . $remote_id);
+            throw new PaymentGatewayException($e);
+        }
+    }
+
 
     public function getShippingInfo(OrderInterface $order)
     {
@@ -476,5 +628,13 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
     public function getPaytabsEntity()
     {
         return $this->entityId;
+    }
+
+    public function assertAmount(PaymentInterface $payment, Price $amount,$type)
+    {
+        $balance = $payment->getBalance();
+        if ($amount->greaterThan($balance)) {
+            throw new InvalidRequestException(sprintf("Can't ".$type." more than %s.", $balance->__toString()));
+        }
     }
 }
