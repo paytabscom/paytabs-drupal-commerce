@@ -4,7 +4,7 @@
 namespace Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect;
 
 //init for drupal commerce plugin
-class Paytabs_core2{
+class Paytabs_core{
 }
 /**
  * PayTabs 2 PHP SDK

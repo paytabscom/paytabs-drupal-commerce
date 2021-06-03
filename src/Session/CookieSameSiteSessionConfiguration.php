@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\commerce_paytabs_pt2\Session;
+namespace Drupal\paytabs_drupal_commerce\Session;
 
 use Drupal\Core\Session\SessionConfiguration;
 use Symfony\Component\HttpFoundation\Request;

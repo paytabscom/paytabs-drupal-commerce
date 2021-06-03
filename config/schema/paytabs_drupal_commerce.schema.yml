@@ -10,6 +10,9 @@ commerce_payment.commerce_payment_gateway.plugin.paytabs_offsite_redirect:
     merchant_region:
       type: string
       label: 'region'
+    pay_page_mode:
+      type: string
+      label: 'Pay Page Mode'
     complete_order_status:
       type: string
       label: 'complete order status'

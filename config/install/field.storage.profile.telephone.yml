@@ -3,7 +3,7 @@ status: true
 dependencies:
   enforced:
     module:
-      - commerce_paytabs_pt2
+      - paytabs_drupal_commerce
   module:
     - core
     - profile

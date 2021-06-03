@@ -99,7 +99,7 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
         $platform_info = Yaml::parseFile(DRUPAL_ROOT . '/modules/contrib/commerce/commerce.info.yml');
         $platform_version = $platform_info['version'];
 
-        $plugin_info = Yaml::parseFile(DRUPAL_ROOT . '/modules/contrib/commerce_paytabs_pt2/commerce_paytabs_pt2.info.yml');
+        $plugin_info = Yaml::parseFile(DRUPAL_ROOT . '/modules/contrib/paytabs_drupal_commerce/paytabs_drupal_commerce.info.yml');
         $plugin_version = $plugin_info['version'];
         $payment_page_mode = $config['pay_page_mode'];
 

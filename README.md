@@ -23,18 +23,15 @@ But make sure to enable the 'Telephone' core module.
 
 INSTALLATION
 ------------
-* You can install this module via Composer, or
-* clone it from drupal.org Git repo, or
-* Download the module from D.O and install it the usual way:
-   - Place it in the /modules/contrib directory
-   - Go to 'Extend' as an administrator, and
-   - Enable the module
 
 * Install Via Composer:
   - composer require paytabscom/paytabs-drupal-commerce
 
 * Install Via Github Repo Link:
   - https://github.com/paytabscom/paytabs-drupal-commerce
+  - extract the downloaded file and Place it in the /modules/contrib directory with folder name paytabs_drupal_commerce
+
+- Go to 'Extend' as an administrator, and Enable the module
 
 CONFIGURATION
 -------------
