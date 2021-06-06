@@ -257,7 +257,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $respStatus = $request->request->get('respStatus');
             $transaction_type = $paytabs_api->verify_payment($trans_ref);
             $transaction_type = $transaction_type->tran_type;
-            //$this->logger->info('return Payment information. Transaction reference: ' . $trans_ref);
+            $this->logger->info('return Payment information. Transaction reference: ' . $trans_ref);
             if ($respStatus === 'A') {
                 $message = 'Your payment was successful to payTabs with Transaction reference ';
                 if ($transaction_type === 'Sale')
@@ -306,9 +306,9 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                     'remote_state' => $respStatus,
                     'authorized' => $this->time->getRequestTime(),
                 ]);
-                //$this->logger->info('Saving Payment information. Transaction reference: ' . $trans_ref);
+                $this->logger->info('Saving Payment information. Transaction reference: ' . $trans_ref);
                 $payment->save();
-                //$this->logger->info('Payment information saved successfully. Transaction reference: ' . $trans_ref);
+                $this->logger->info('Payment information saved successfully. Transaction reference: ' . $trans_ref);
 
             }
 
@@ -345,7 +345,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $transaction_type = $paytabs_api->verify_payment($trans_ref);
             $transaction_type = $transaction_type->tran_type;
 
-            //$this->logger->info('return Payment information. Transaction reference: ' . $trans_ref);
+            $this->logger->info('return Payment information. Transaction reference: ' . $trans_ref);
             if ($respStatus === 'A') {
                 $message = 'Your payment was successful to payTabs with Transaction reference ';
                 if ($transaction_type === 'Sale')
@@ -394,9 +394,9 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                     'remote_state' => $respStatus,
                     'authorized' => $this->time->getRequestTime(),
                 ]);
-                //$this->logger->info('Saving Payment information. Transaction reference: ' . $trans_ref);
+                $this->logger->info('Saving Payment information. Transaction reference: ' . $trans_ref);
                 $payment->save();
-                //$this->logger->info('Payment information saved successfully. Transaction reference: ' . $trans_ref);
+                $this->logger->info('Payment information saved successfully. Transaction reference: ' . $trans_ref);
 
             }
             $order->set('state', $this->configuration['complete_order_status']);
@@ -460,10 +460,10 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 $payment->setRefundedAmount($new_refunded_amount);
                 $payment->save();
             } else if ($pending_success) {
-                $this->messenger()->addError($this->t('not valid result from PayTabs'));
+                $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
             }
         } catch (\Exception $e) {
-            //$this->logger->log('error', 'failed to proceed to refund transaction:' . $remote_id);
+            $this->logger->log('error', 'failed to proceed to refund transaction:' . $remote_id."<br>" . $message);
             throw new PaymentGatewayException($e);
         }
 
@@ -519,9 +519,9 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                         'remote_state' => $result->payment_result->response_status,
                         'authorized' => $this->time->getRequestTime(),
                     ]);
-                    //$this->logger->info('Saving Payment information. Transaction reference: ' . $result->tran_ref);
+                    $this->logger->info('Saving Payment information. Transaction reference: ' . $result->tran_ref);
                     $payment->save();
-                    //$this->logger->info('Payment information saved successfully. Transaction reference: ' . $result->tran_ref);
+                    $this->logger->info('Payment information saved successfully. Transaction reference: ' . $result->tran_ref);
 
                 }
                 else //full capture
@@ -533,10 +533,10 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 }
 
             } else if ($pending_success) {
-                $this->messenger()->addError($this->t('not valid result from PayTabs'));
+                $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
             }
         } catch (\Exception $e) {
-            //$this->logger->log('error', 'failed to proceed to capture transaction:' . $remote_id);
+            $this->logger->log('error', 'failed to proceed to capture transaction:' . $remote_id."<br>" . $message);
             throw new PaymentGatewayException($e);
         }
     }
@@ -577,10 +577,10 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 $payment->save();
 
             } else if ($pending_success) {
-                $this->messenger()->addError($this->t('not valid result from PayTabs'));
+                $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
             }
         } catch (\Exception $e) {
-            //$this->logger->log('error', 'failed to proceed to capture transaction:' . $remote_id);
+            $this->logger->log('error', 'failed to proceed to void transaction:' . $remote_id. "<br>" . $message);
             throw new PaymentGatewayException($e);
         }
     }
