@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\paytabs_drupal_commerce\Plugin\Commerce\PaymentGateway;
+namespace Drupal\clickpay_drupal_commerce\Plugin\Commerce\PaymentGateway;
 
 use Drupal\commerce_order\Entity\OrderInterface;
 use Drupal\commerce_payment\Entity\PaymentInterface;
@@ -9,10 +9,10 @@ use Drupal\commerce_payment\PaymentMethodTypeManager;
 use Drupal\commerce_payment\PaymentTypeManager;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\OffsitePaymentGatewayBase;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsAuthorizationsInterface;
-use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\Paytabs_core;
-use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsApi;
-use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsEnum;
-use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsFollowupHolder;
+use Drupal\clickpay_drupal_commerce\PluginForm\OffsiteRedirect\Clickpay_core;
+use Drupal\clickpay_drupal_commerce\PluginForm\OffsiteRedirect\ClickpayApi;
+use Drupal\clickpay_drupal_commerce\PluginForm\OffsiteRedirect\ClickpayEnum;
+use Drupal\clickpay_drupal_commerce\PluginForm\OffsiteRedirect\ClickpayFollowupHolder;
 use Drupal\commerce_price\Price;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -30,11 +30,11 @@ use Drupal\commerce_payment\Exception\InvalidRequestException;
  * Provides the Off-site Redirect payment gateway.
  *
  * @CommercePaymentGateway(
- *   id = "paytabs_offsite_redirect",
- *   label = "Paytabs Payment Gateway",
- *   display_label = "Paytabs Payment Gateway",
+ *   id = "clickpay_offsite_redirect",
+ *   label = "Clickpay Payment Gateway",
+ *   display_label = "Clickpay Payment Gateway",
  *   forms = {
- *     "offsite-payment" = "Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsOffsiteForm",
+ *     "offsite-payment" = "Drupal\clickpay_drupal_commerce\PluginForm\OffsiteRedirect\ClickpayOffsiteForm",
  *   },
  *   payment_method_types = {"credit_card"},
  *   credit_card_types = {
@@ -42,7 +42,7 @@ use Drupal\commerce_payment\Exception\InvalidRequestException;
  *   },
  * )
  */
-class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements SupportsRefundsInterface,SupportsAuthorizationsInterface
+class ClickpayOffsiteRedirect extends OffsitePaymentGatewayBase implements SupportsRefundsInterface,SupportsAuthorizationsInterface
 {
     /**
      * The logger.
@@ -74,7 +74,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
 
     /**
-     * Constructs a new PaytabsOffsiteRedirect object.
+     * Constructs a new ClickpayOffsiteRedirect object.
      *
      * @param array $configuration
      *   A configuration array containing information about the plugin instance.
@@ -101,7 +101,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
     {
         parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $payment_type_manager, $payment_method_type_manager, $time);
 
-        $this->logger = $logger_channel_factory->get('paytabs_drupal_commerce');
+        $this->logger = $logger_channel_factory->get('clickpay_drupal_commerce');
         $this->httpClient = $client;
         $this->moduleHandler = $module_handler;
     }
@@ -150,28 +150,23 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             '#type' => 'number',
             '#title' => $this->t('Merchant Profile id'),
             '#required' => TRUE,
-            '#description' => $this->t('Your merchant profile id , you can find the profile id on your ayTabs Merchant’s Dashboard- profile.'),
+            '#description' => $this->t('Your merchant profile id , you can find the profile id on your Clickpay Merchant’s Dashboard- profile.'),
             '#default_value' => $this->configuration['profile_id'],
         ];
         $form['server_key'] = [
             '#type' => 'textfield',
             '#required' => TRUE,
             '#title' => $this->t('Server Key'),
-            '#description' => $this->t('You can find the Server key on your PayTabs Merchant’s Dashboard - Developers - Key management.'),
+            '#description' => $this->t('You can find the Server key on your Clickpay Merchant’s Dashboard - Developers - Key management.'),
             '#default_value' => $this->configuration['server_key'],
         ];
         $form['region'] = [
             '#type' => 'select',
             '#required' => TRUE,
             '#title' => $this->t('Merchant region'),
-            '#description' => $this->t('The region you registered in with PayTabs'),
+            '#description' => $this->t('The region you registered in with Clickpay'),
             '#options' => [
-                'ARE' => $this->t('United Arab Emirates'),
-                'EGY' => $this->t('Egypt'),
                 'SAU' => $this->t('Saudi Arabia'),
-                'OMN' => $this->t('Oman'),
-                'JOR' => $this->t('Jordan'),
-                'GLOBAL' => $this->t('GLOBAL'),
             ],
             '#default_value' => $this->configuration['region'],
         ];
@@ -244,22 +239,22 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
         $all_response = $request->request->all();
 
-        /**PayTabs SDK**/
-        $paytabs_core = new Paytabs_core();
-        $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
+        /**Clickpay SDK**/
+        $Clickpay_core = new Clickpay_core();
+        $Clickpay_api = ClickpayApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
 
-        $is_valid = $paytabs_api->is_valid_redirect($all_response);
+        $is_valid = $Clickpay_api->is_valid_redirect($all_response);
 
         if (!$is_valid) {
-            $this->messenger()->addError($this->t('not valid result from PayTabs'));
+            $this->messenger()->addError($this->t('not valid result from Clickpay'));
         } else {
             $trans_ref = $request->request->get('tranRef');
             $respStatus = $request->request->get('respStatus');
-            $transaction_type = $paytabs_api->verify_payment($trans_ref);
+            $transaction_type = $Clickpay_api->verify_payment($trans_ref);
             $transaction_type = $transaction_type->tran_type;
             $this->logger->info('return Payment information. Transaction reference: ' . $trans_ref);
             if ($respStatus === 'A') {
-                $message = 'Your payment was successful to payTabs with Transaction reference ';
+                $message = 'Your payment was successful to Clickpay with Transaction reference ';
                 if ($transaction_type === 'Sale')
                 {
                     $payment_status = 'completed';
@@ -331,23 +326,23 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
         $all_response = $request->request->all();
 
-        /**PayTabs SDK**/
-        $paytabs_core = new Paytabs_core();
-        $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
+        /**Clickpay SDK**/
+        $clickpay_core = new Clickpay_core();
+        $clickpay_api = ClickpayApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
 
-        $is_valid = $paytabs_api->is_valid_redirect($all_response);
+        $is_valid = $clickpay_api->is_valid_redirect($all_response);
 
         if (!$is_valid) {
-            $this->messenger()->addError($this->t('not valid result from PayTabs'));
+            $this->messenger()->addError($this->t('not valid result from ClickPay'));
         } else {
             $trans_ref = $request->request->get('tranRef');
             $respStatus = $request->request->get('respStatus');
-            $transaction_type = $paytabs_api->verify_payment($trans_ref);
+            $transaction_type = $clickpay_api->verify_payment($trans_ref);
             $transaction_type = $transaction_type->tran_type;
 
             $this->logger->info('return Payment information. Transaction reference: ' . $trans_ref);
             if ($respStatus === 'A') {
-                $message = 'Your payment was successful to payTabs with Transaction reference ';
+                $message = 'Your payment was successful to ClickPay with Transaction reference ';
                 if ($transaction_type === 'Sale')
                 {
                     $payment_status = 'completed';
@@ -429,20 +424,20 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         $remote_id = $payment->getRemoteId();
         $cart_id = $payment->getOrder()->id();
 
-        /**PayTabs SDK**/
-        $paytabs_core = new Paytabs_core();
-        $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
-        $refund = new PaytabsFollowupHolder();
+        /**Clickpay SDK**/
+        $clickpay_core = new Clickpay_core();
+        $clickpay_api = ClickpayApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
+        $refund = new ClickpayFollowupHolder();
         $this->assertRefundAmount($payment, $amount);
 
         // Perform the refund request here, throw an exception if it fails.
         try {
-            $refund->set02Transaction(PaytabsEnum::TRAN_TYPE_REFUND, PaytabsEnum::TRAN_CLASS_ECOM)
+            $refund->set02Transaction(ClickpayEnum::TRAN_TYPE_REFUND, ClickpayEnum::TRAN_CLASS_ECOM)
                 ->set03Cart($cart_id, $currency_code, $decimal_amount, 'refunded from drupal')
                 ->set30TransactionInfo($remote_id);
 
             $refund_params = $refund->pt_build();
-            $result = $paytabs_api->request_followup($refund_params);
+            $result = $clickpay_api->request_followup($refund_params);
 
             $success = $result->success;
             $message = $result->message;
@@ -460,7 +455,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 $payment->setRefundedAmount($new_refunded_amount);
                 $payment->save();
             } else if ($pending_success) {
-                $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
+                $this->messenger()->addError($this->t('not valid result from ClickPay'."<br>" . $message));
             }
         } catch (\Exception $e) {
             $this->logger->log('error', 'failed to proceed to refund transaction:' . $remote_id."<br>" . $message);
@@ -479,22 +474,22 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         $remote_id = $payment->getRemoteId();
         $cart_id = $payment->getOrder()->id();
 
-        /**PayTabs SDK**/
-        $paytabs_core = new Paytabs_core();
-        $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
-        $capture = new PaytabsFollowupHolder();
+        /**Clickpay SDK**/
+        $clickpay_core = new Clickpay_core();
+        $clickpay_api = ClickpayApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
+        $capture = new ClickpayFollowupHolder();
 
         //to prevent from capture more than the order value
         $this->assertAmount($payment, $amount,'Capture');
 
         // Perform the refund request here, throw an exception if it fails.
         try {
-            $capture->set02Transaction(PaytabsEnum::TRAN_TYPE_CAPTURE, PaytabsEnum::TRAN_CLASS_ECOM)
+            $capture->set02Transaction(ClickpayEnum::TRAN_TYPE_CAPTURE, ClickpayEnum::TRAN_CLASS_ECOM)
                 ->set03Cart($cart_id, $currency_code, $decimal_amount, 'Capture from drupal')
                 ->set30TransactionInfo($remote_id);
 
             $capture_params = $capture->pt_build();
-            $result = $paytabs_api->request_followup($capture_params);
+            $result = $clickpay_api->request_followup($capture_params);
 
             $success = $result->success;
             $message = $result->message;
@@ -533,7 +528,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 }
 
             } else if ($pending_success) {
-                $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
+                $this->messenger()->addError($this->t('not valid result from ClickPay'."<br>" . $message));
             }
         } catch (\Exception $e) {
             $this->logger->log('error', 'failed to proceed to capture transaction:' . $remote_id."<br>" . $message);
@@ -552,20 +547,20 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         $remote_id = $payment->getRemoteId();
         $cart_id = $payment->getOrder()->id();
 
-        /**PayTabs SDK**/
-        $paytabs_core = new Paytabs_core();
-        $paytabs_api = PaytabsApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
-        $void = new PaytabsFollowupHolder();
+        /**Clickpay SDK**/
+        $clickpay_core = new Clickpay_core();
+        $clickpay_api = ClickpayApi::getInstance($this->configuration['region'], $this->configuration['profile_id'], $this->configuration['server_key']);
+        $void = new ClickpayFollowupHolder();
 
 
         // Perform the refund request here, throw an exception if it fails.
         try {
-            $void->set02Transaction(PaytabsEnum::TRAN_TYPE_VOID, PaytabsEnum::TRAN_CLASS_ECOM)
+            $void->set02Transaction(ClickpayEnum::TRAN_TYPE_VOID, ClickpayEnum::TRAN_CLASS_ECOM)
                 ->set03Cart($cart_id, $currency_code, $decimal_amount, 'void from drupal')
                 ->set30TransactionInfo($remote_id);
 
             $capture_params = $void->pt_build();
-            $result = $paytabs_api->request_followup($capture_params);
+            $result = $clickpay_api->request_followup($capture_params);
 
             $success = $result->success;
             $message = $result->message;
@@ -577,7 +572,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 $payment->save();
 
             } else if ($pending_success) {
-                $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
+                $this->messenger()->addError($this->t('not valid result from Clickpay'."<br>" . $message));
             }
         } catch (\Exception $e) {
             $this->logger->log('error', 'failed to proceed to void transaction:' . $remote_id. "<br>" . $message);
@@ -624,7 +619,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         }
     }
 
-    public function getPaytabsEntity()
+    public function getClickpayEntity()
     {
         return $this->entityId;
     }

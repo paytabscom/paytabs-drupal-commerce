@@ -3,7 +3,7 @@ status: true
 dependencies:
   enforced:
     module:
-      - paytabs_drupal_commerce
+      - clickpay_drupal_commerce
   module:
     - core
     - profile

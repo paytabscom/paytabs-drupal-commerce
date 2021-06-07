@@ -1,8 +1,8 @@
-Commerce PayTabs PT2
+Commerce ClickPay PT2
 
 Description
 -----------
-This module provides integration with the PayTabs payment gateway.
+This module provides integration with the ClickPay payment gateway.
 
 CONTENTS OF THIS FILE
 ---------------------
@@ -29,7 +29,7 @@ INSTALLATION
 
 * Install Via Github Repo Link:
   - https://github.com/paytabscom/paytabs-drupal-commerce
-  - extract the downloaded file and Place it in the /modules/contrib directory with folder name paytabs_drupal_commerce
+  - extract the downloaded file and Place it in the /modules/contrib directory with folder name clickpay_drupal_commerce
 
 - Go to 'Extend' as an administrator, and Enable the module
 
