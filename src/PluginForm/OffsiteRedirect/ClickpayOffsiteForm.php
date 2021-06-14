@@ -117,7 +117,7 @@ class ClickpayOffsiteForm extends BasePaymentOffsiteForm
 
 
         $pp_params = $clickpay_core->pt_build();
-        $response = $clickpay_core->create_pay_page($pp_params);
+        $response = $clickpay_api->create_pay_page($pp_params);
 
         if ($response->success) {
             $redirect_url = $response->redirect_url;
@@ -127,7 +127,7 @@ class ClickpayOffsiteForm extends BasePaymentOffsiteForm
             return $this->buildRedirectForm($form, $form_state, $redirect_url, $pp_params, $redirect_method);
         } else {
             \Drupal::messenger()->addStatus($this->t('Something went wrong, please try again later'));
-            $this->logger->error('failed to create payment page for order : ' . $order_number . 'and response from Clickpay is :' . $response);
+            $this->logger->error('failed to create payment page for order : and response from Clickpay is :' . $response);
         }
 
     }
