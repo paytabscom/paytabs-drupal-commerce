@@ -13,7 +13,7 @@ CONTENTS OF THIS FILE
 
 INTRODUCTION
 ------------
-This project integrates PayTabs online payments into
+This project integrates ClickPay online payments into
 the Drupal Commerce payment and checkout systems.
 
 REQUIREMENTS
@@ -33,19 +33,20 @@ INSTALLATION
 
 CONFIGURATION
 -------------
-* Create new PayTabs payment gateway
+* Create new ClickPay payment gateway
   Administration > Commerce > Configuration > Payment gateways > Add payment gateway
   Provide the following settings:
   - Merchant Profile id.
   - Server key.
   - Merchant region.
+  - Pay Page Mode
   - Order Complete status
   
 * Make sure to install telephone module and enable it
   - go to config / people / profile types/ manage fields / add new field
   - add phone number field with name phone.
   
-* Make sure that your website currency is as same as your currency in payTabs profile
+* Make sure that your website currency is as same as your currency in ClickPay profile
 
 SCREENSHOTS
 -------------
