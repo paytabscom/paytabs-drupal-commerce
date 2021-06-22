@@ -40,6 +40,8 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
         $payment_gateway_plugin = $payment->getPaymentGateway()->getPlugin();
         $config = $payment_gateway_plugin->getConfiguration();
 
+        //dump($config['iframe']);
+        //exit();
         /**PayTabs SDK**/
         $paytabs_init = new Paytabs_core();
         $paytabs_core = new PaytabsRequestHolder();
@@ -102,6 +104,7 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
         $plugin_info = Yaml::parseFile(DRUPAL_ROOT . '/modules/contrib/paytabs_drupal_commerce/paytabs_drupal_commerce.info.yml');
         $plugin_version = $plugin_info['version'];
         $payment_page_mode = $config['pay_page_mode'];
+        $frammed = $config['iframe']=='true' ? true : false;
 
         $paytabs_core
             ->set01PaymentCode('all') // 'card', 'stcpay', 'amex' ...
@@ -112,24 +115,38 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
             ->set06HideShipping(false)
             ->set07URLs($form['#return_url'], $call_back)
             ->set08Lang($language)
-            ->set09Framed(false)
+            ->set09Framed($frammed)
             ->set99PluginInfo('DrupalCommerce',$platform_version,$plugin_version);
 
 
         $pp_params = $paytabs_core->pt_build();
         $response = $paytabs_api->create_pay_page($pp_params);
 
-        if ($response->success) {
+
+        if ($response->success)
+        {
             $redirect_url = $response->redirect_url;
             $form['commerce_message']['#action'] = $redirect_url;
             $redirect_method = 'post';
 
-            return $this->buildRedirectForm($form, $form_state, $redirect_url, $pp_params, $redirect_method);
-        } else {
-            \Drupal::messenger()->addStatus($this->t('Something went wrong, please try again later'));
-            $this->logger->error('failed to create payment page for order : ' . $order_number . 'and response from paytabs is :' . $response);
-        }
+            if ($frammed === true)
+            {
+                $form['#attached']['drupalSettings']['paytabs_drupal_commerce'] = $redirect_url;
+                $form['#attached']['drupalSettings']['return_url'] = $form['#return_url'];
+                $form['#attached']['library'][] = 'paytabs_drupal_commerce/checkout';
 
+                // No need to call buildRedirectForm(), as we embed an iframe.
+                return $form;
+            }else
+            {
+                return $this->buildRedirectForm($form, $form_state, $redirect_url, $pp_params, $redirect_method);
+            }
+
+        }
+        else {
+            \Drupal::messenger()->addStatus($this->t('Something went wrong, please try again later'));
+            $this->logger->error('failed to create payment page for order and response from paytabs is :' . $response);
+        }
     }
 
     /**
