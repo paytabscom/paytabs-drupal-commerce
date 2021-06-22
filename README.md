@@ -42,6 +42,8 @@ CONFIGURATION
   - Server key.
   - Merchant region.
   - Order Complete status
+  - Paypage Mode
+  - iframe
   
 * Make sure to install telephone module and enable it
   - go to config / people / profile types/ manage fields / add new field
