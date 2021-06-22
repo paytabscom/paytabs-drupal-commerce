@@ -135,6 +135,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 'server_key' => '',
                 'region' => '',
                 'pay_page_mode' => '',
+                'iframe' => '',
                 'complete_order_status' => '',
             ] + parent::defaultConfiguration();
     }
@@ -187,6 +188,18 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             '#default_value' => $this->configuration['pay_page_mode'],
         ];
 
+        $form['iframe'] =[
+            '#type' => 'select',
+            '#required' => TRUE,
+            '#title' => $this->t('Integration Mode'),
+            '#description' => $this->t('The mode you need to integrate with '),
+            '#options' => [
+                'false' => $this->t('Redirect outside the site'),
+                'true' => $this->t('Iframe inside the site'),
+            ],
+            '#default_value' => $this->configuration['integration_mode'],
+        ];
+
         $form['complete_order_status'] = [
             '#type' => 'select',
             '#required' => TRUE,
@@ -216,6 +229,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $this->configuration['server_key'] = $values['server_key'];
             $this->configuration['region'] = $values['region'];
             $this->configuration['pay_page_mode'] = $values['pay_page_mode'];
+            $this->configuration['iframe'] = $values['iframe'];
             $this->configuration['complete_order_status'] = $values['complete_order_status'];
         }
     }
@@ -232,6 +246,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $this->configuration['server_key'] = $values['server_key'];
             $this->configuration['region'] = $values['region'];
             $this->configuration['pay_page_mode'] = $values['pay_page_mode'];
+            $this->configuration['iframe'] = $values['iframe'];
             $this->configuration['complete_order_status'] = $values['complete_order_status'];
         }
     }
