@@ -621,6 +621,10 @@ class PaytabsApi
             'title' => 'Egypt',
             'endpoint' => 'https://secure-egypt.paytabs.com/'
         ],
+        'IRQ' => [
+            'title' => 'Iraq',
+            'endpoint' => 'https://secure-iraq.paytabs.com/'
+        ],
         'GLOBAL' => [
             'title' => 'Global',
             'endpoint' => 'https://secure-global.paytabs.com/'
