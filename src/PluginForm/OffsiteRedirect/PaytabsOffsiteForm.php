@@ -104,7 +104,8 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
         $plugin_info = Yaml::parseFile(DRUPAL_ROOT . '/modules/contrib/paytabs_drupal_commerce/paytabs_drupal_commerce.info.yml');
         $plugin_version = $plugin_info['version'];
         $payment_page_mode = $config['pay_page_mode'];
-        $frammed = $config['iframe']=='true' ? true : false;
+        $frammed = $config['iframe'] == 'true' ? true : false;
+        $hide_shipping = $config['hide_shipping_address'] == 'true' ? true : false;
 
         $paytabs_core
             ->set01PaymentCode('all') // 'card', 'stcpay', 'amex' ...
@@ -116,6 +117,7 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
             ->set07URLs($form['#return_url'], $call_back)
             ->set08Lang($language)
             ->set09Framed($frammed)
+            ->set06HideShipping($hide_shipping)
             ->set99PluginInfo('DrupalCommerce',$platform_version,$plugin_version);
 
 

@@ -137,6 +137,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 'pay_page_mode' => '',
                 'iframe' => '',
                 'complete_order_status' => '',
+                'hide_shipping_address' => '',
             ] + parent::defaultConfiguration();
     }
 
@@ -201,6 +202,18 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             '#default_value' => $this->configuration['integration_mode'],
         ];
 
+        $form['hide_shipping_address'] =[
+            '#type' => 'select',
+            '#required' => FALSE,
+            '#title' => $this->t('Hide shipping address'),
+            '#description' => $this->t('Hide shipping address'),
+            '#options' => [
+                'false' => $this->t('Show shipping address'),
+                'true' => $this->t('Hide shipping address'),
+            ],
+            '#default_value' => $this->configuration['hide_shipping_address'],
+        ];
+
         $form['complete_order_status'] = [
             '#type' => 'select',
             '#required' => TRUE,
@@ -231,6 +244,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $this->configuration['region'] = $values['region'];
             $this->configuration['pay_page_mode'] = $values['pay_page_mode'];
             $this->configuration['iframe'] = $values['iframe'];
+            $this->configuration['hide_shipping_address'] = $values['hide_shipping_address'];
             $this->configuration['complete_order_status'] = $values['complete_order_status'];
         }
     }
@@ -248,6 +262,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $this->configuration['region'] = $values['region'];
             $this->configuration['pay_page_mode'] = $values['pay_page_mode'];
             $this->configuration['iframe'] = $values['iframe'];
+            $this->configuration['hide_shipping_address'] = $values['hide_shipping_address'];
             $this->configuration['complete_order_status'] = $values['complete_order_status'];
         }
     }
