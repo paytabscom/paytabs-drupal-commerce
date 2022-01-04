@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsRefundsInterface;
 use Drupal\commerce_payment\Exception\InvalidRequestException;
-
+use Drupal\Core\Url;
 /**
  * Provides the Off-site Redirect payment gateway.
  *
@@ -138,6 +138,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 'iframe' => '',
                 'complete_order_status' => '',
                 'hide_shipping_address' => '',
+                'ipn_url'=>'',
             ] + parent::defaultConfiguration();
     }
 
@@ -199,7 +200,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 'false' => $this->t('Redirect outside the site'),
                 'true' => $this->t('Iframe inside the site'),
             ],
-            '#default_value' => $this->configuration['integration_mode'],
+            '#default_value' => $this->configuration['iframe'],
         ];
 
         $form['hide_shipping_address'] =[
@@ -226,6 +227,16 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             ],
             '#default_value' => $this->configuration['complete_order_status'],
         ];
+        $site_url = Url::fromUri('internal:/', ['absolute' => TRUE])->toString();
+        $payment_entity = 'paytabs_payment';
+        $call_back = $site_url . 'payment/notify/' . $payment_entity;
+        $form['ipn_url'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('ipn_url'),
+          '#description' => $this->t('The IPN url to your website'),
+          '#default_value' => $call_back,
+          '#readonly' => 'readonly'
+        ];
 
         return $form;
     }
@@ -246,6 +257,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $this->configuration['iframe'] = $values['iframe'];
             $this->configuration['hide_shipping_address'] = $values['hide_shipping_address'];
             $this->configuration['complete_order_status'] = $values['complete_order_status'];
+            $this->configuration['ipn_url'] = $values['ipn_url'];
         }
     }
 
@@ -264,6 +276,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             $this->configuration['iframe'] = $values['iframe'];
             $this->configuration['hide_shipping_address'] = $values['hide_shipping_address'];
             $this->configuration['complete_order_status'] = $values['complete_order_status'];
+            $this->configuration['ipn_url'] = $values['ipn_url'];
         }
     }
 
