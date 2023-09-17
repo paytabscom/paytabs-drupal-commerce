@@ -297,6 +297,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
         if (!$is_valid) {
             $this->messenger()->addError($this->t('not valid result from PayTabs'));
+            $this->logger->info('not valid result from PayTabs.');
         } else {
             $trans_ref = $request->request->get('tranRef');
             $respStatus = $request->request->get('respStatus');
@@ -359,6 +360,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
             $order->set('state', $this->configuration['complete_order_status']);
             $order->save();
+            $this->logger->info('order status updated successfully.');
 
         }
 
@@ -384,6 +386,8 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
         if (!$is_valid) {
             $this->messenger()->addError($this->t('not valid result from PayTabs'));
+            $this->logger->info('not valid result from PayTabs.');
+            
         } else {
             $trans_ref = $request->request->get('tranRef');
             $respStatus = $request->request->get('respStatus');
@@ -459,6 +463,9 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
         $this->messenger()->addError($this->t('You have canceled checkout at @gateway but may resume the checkout process here when you are ready.', [
             '@gateway' => $this->getDisplayLabel(),
         ]));
+
+        $this->logger->info('Payment have been cancelled by the user');
+
     }
 
     /**
@@ -506,6 +513,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 $payment->save();
             } else if ($pending_success) {
                 $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
+                $this->logger->info($this->t('not valid result from PayTabs'."<br>" . $message));
             }
         } catch (\Exception $e) {
             $this->logger->log('error', 'failed to proceed to refund transaction:' . $remote_id."<br>" . $message);
@@ -579,6 +587,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
             } else if ($pending_success) {
                 $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
+                $this->t('not valid result from PayTabs'."<br>" . $message)
             }
         } catch (\Exception $e) {
             $this->logger->log('error', 'failed to proceed to capture transaction:' . $remote_id."<br>" . $message);
@@ -623,6 +632,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
             } else if ($pending_success) {
                 $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
+                $this->t('not valid result from PayTabs'."<br>" . $message)
             }
         } catch (\Exception $e) {
             $this->logger->log('error', 'failed to proceed to void transaction:' . $remote_id. "<br>" . $message);
