@@ -54,6 +54,7 @@ class PaymentNotificationController extends ControllerBase implements SupportsNo
 
     if (!$is_valid) {
       $this->messenger()->addError($this->t('not valid result from PayTabs'));
+      $this->logger->info($this->t('not valid result from PayTabs'));
     }
     else {
       $trans_ref = $request->request->get('tranRef');

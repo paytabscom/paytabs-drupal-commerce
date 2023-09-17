@@ -64,7 +64,17 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
 
 
         /** @var \Drupal\address\Plugin\Field\FieldType\AddressItem $billing_info */
-        $billing_info = $profile->get('address')->first();
+        if($profile->hasField('address'))
+        {
+            $billing_info = $profile->get('address')->first();
+        }
+        else
+        {
+            \Drupal::messenger()->addStatus($this->t('please add an address to can complete the order and make the payment'));
+            $this->logger->error('failed to create payment page for order no addreess is found for this user');
+            exit();
+        }
+       
 
 
         /** @var \Drupal\telephone\Plugin\Field\FieldType\TelephoneItem $phone */
