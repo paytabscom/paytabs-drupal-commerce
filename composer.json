@@ -1,12 +1,13 @@
 {
     "name": "paytabscom/paytabs_drupal_commerce",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "type": "drupal-module",
     "description": "PayTabs payment integration for Drupal Commerce 2.x.",
     "authors": [
         {
-            "name": "Walaa Elsaeed",
-            "email": "w.elsaeed@paytabs.com"
+            "name": "PayTabs",
+            "role": "Integration team",
+            "email": "integration@paytabs.com"
         }
     ],
     "homepage": "https://www.drupal.org/project/paytabs_drupal_cmmerce",

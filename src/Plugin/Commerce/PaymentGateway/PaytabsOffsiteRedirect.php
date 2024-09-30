@@ -588,7 +588,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
             } else if ($pending_success) {
                 $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
-                $this->t('not valid result from PayTabs'."<br>" . $message)
+                $this->t('not valid result from PayTabs'."<br>" . $message);
             }
         } catch (\Exception $e) {
             $this->logger->log('error', 'failed to proceed to capture transaction:' . $remote_id."<br>" . $message);
@@ -633,7 +633,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
 
             } else if ($pending_success) {
                 $this->messenger()->addError($this->t('not valid result from PayTabs'."<br>" . $message));
-                $this->t('not valid result from PayTabs'."<br>" . $message)
+                $this->t('not valid result from PayTabs'."<br>" . $message);
             }
         } catch (\Exception $e) {
             $this->logger->log('error', 'failed to proceed to void transaction:' . $remote_id. "<br>" . $message);
