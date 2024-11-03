@@ -2,7 +2,9 @@ name: Paytabs Drupal Commerce
 type: module
 description: 'Provides PayTabs PT2 payment integration for Drupal Commerce 2.x.'
 package: Commerce
+core_version_requirement: ^10
 core: 8.x
 dependencies:
+  - commerce:commerce
   - commerce:commerce_payment
 version: '1.8.0'
