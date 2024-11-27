@@ -25,7 +25,7 @@ INSTALLATION
 ------------
 
 * Install Via Composer:
-  - composer require paytabscom/paytabs_drupal_commerce
+  - composer require paytabscom/paytabs_drupal_commerce:1.9.0
 
 * Install Via Github Repo Link:
   - https://github.com/paytabscom/paytabs-drupal-commerce
