@@ -102,6 +102,7 @@ class PaymentNotificationController extends ControllerBase implements SupportsNo
         ->condition('order_id', $order->id())
         ->condition('remote_id', $trans_ref)
         ->condition('remote_state', $respStatus)
+        ->accessCheck(FALSE)  // Bypass access checks
         ->execute();
 
       if (empty($query)) {

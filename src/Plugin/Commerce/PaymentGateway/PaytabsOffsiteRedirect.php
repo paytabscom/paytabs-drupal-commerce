@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsRefundsInterface;
+use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\SupportsVoidsInterface;
 use Drupal\commerce_payment\Exception\InvalidRequestException;
 use Drupal\Core\Url;
 /**
@@ -42,7 +43,7 @@ use Drupal\Core\Url;
  *   },
  * )
  */
-class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements SupportsRefundsInterface,SupportsAuthorizationsInterface
+class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements SupportsRefundsInterface,SupportsVoidsInterface,SupportsAuthorizationsInterface
 {
     /**
      * The logger.
@@ -334,12 +335,12 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
             }
 
 
-
             //Check if order don't have payments to insert it
             $query = \Drupal::entityQuery('commerce_payment')
                 ->condition('order_id', $order->id())
                 ->condition('remote_id', $trans_ref)
                 ->condition('remote_state', $respStatus)
+                ->accessCheck(FALSE)  // Bypass access checks
                 ->execute();
 
             if (empty($query)) {
@@ -431,6 +432,7 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 ->condition('order_id', $order->id())
                 ->condition('remote_id', $trans_ref)
                 ->condition('remote_state', $respStatus)
+                ->accessCheck(FALSE)  // Bypass access checks
                 ->execute();
 
             if (empty($query)) {
