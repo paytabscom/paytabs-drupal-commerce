@@ -11,7 +11,7 @@ use Drupal\paytabs_drupal_commerce\PluginForm\OffsiteRedirect\PaytabsRequestHold
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Symfony\Component\Yaml\Yaml;
 
 class PaytabsOffsiteForm extends BasePaymentOffsiteForm
@@ -24,6 +24,20 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
      *
      */
     protected $logger;
+
+    /**
+   * Logs an error.
+   *
+   * @return \Drupal\Core\Logger\LoggerChannelInterface
+   */
+    protected function getLogger() 
+    {
+        if (!$this->logger) 
+        {
+            $this->logger = \Drupal::service('logger.factory')->get('paytabs_drupal_commerce');
+        }
+        return $this->logger;
+    }
 
     /**
      * {@inheritdoc}
@@ -71,7 +85,7 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
         else
         {
             \Drupal::messenger()->addStatus($this->t('please add an address to can complete the order and make the payment'));
-            $this->logger->error('failed to create payment page for order no addreess is found for this user');
+            $this->getLogger()->error('failed to create payment page for order no addreess is found for this user');
             exit();
         }
        
@@ -156,8 +170,11 @@ class PaytabsOffsiteForm extends BasePaymentOffsiteForm
 
         }
         else {
-            \Drupal::messenger()->addStatus($this->t('Something went wrong, please try again later'));
-            $this->logger->error('failed to create payment page for order and response from paytabs is :' . $response);
+            \Drupal::messenger()->addStatus($this->t('Something went wrong, please try again later));
+            // Log the error using the logger service.
+            $this->getLogger()->error('failed to create payment page for order and response from paytabs is: @response', [
+                '@response' => json_encode($response),
+            ]);
         }
     }
 
