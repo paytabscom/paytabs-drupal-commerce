@@ -176,7 +176,6 @@ class PaytabsOffsiteRedirect extends OffsitePaymentGatewayBase implements Suppor
                 'OMN' => $this->t('Oman'),
                 'JOR' => $this->t('Jordan'),
                 'IRQ' => $this->t('Iraq'),
-                'PSE' => $this->t('Palestine'),
                 'KWT' => $this->t('Kuwait'),
                 'GLOBAL' => $this->t('GLOBAL'),
             ],
