@@ -1,6 +1,6 @@
 {
     "name": "paytabscom/paytabs_drupal_commerce",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "type": "drupal-module",
     "description": "PayTabs payment integration for Drupal Commerce 2.x.",
     "authors": [
